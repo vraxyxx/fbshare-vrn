@@ -2,78 +2,64 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Facebook Auto Share Booster</title>
+  <title>FB Booster (Testing)</title>
   <style>
-    body {
-      background: #0f0f0f;
-      color: #fff;
-      font-family: Arial, sans-serif;
-      padding: 30px;
-      text-align: center;
-    }
-    input, select, button {
+    body { background: #121212; color: #fff; font-family: sans-serif; padding: 20px; text-align: center; }
+    input, select, textarea, button {
       margin: 10px;
       padding: 10px;
-      border-radius: 5px;
       width: 80%;
       max-width: 400px;
+      background: #1e1e1e;
+      color: #fff;
+      border: 1px solid #444;
+      border-radius: 6px;
     }
-    button {
-      background-color: #00f0ff;
-      color: black;
-      font-weight: bold;
-      border: none;
-    }
-    .response {
-      margin-top: 20px;
-      font-weight: bold;
-    }
+    button { background-color: #00f0ff; color: black; font-weight: bold; }
+    img { border-radius: 10px; margin-top: 10px; max-width: 150px; }
   </style>
 </head>
 <body>
-  <h1>🚀 Facebook Share Booster</h1>
-  <form id="boostForm">
-    <input type="text" name="cookie" placeholder="FB Cookie or fbstate" required><br>
-    <input type="text" name="url" placeholder="Facebook Post URL" required><br>
-    <input type="number" name="amount" placeholder="Amount" required><br>
-    <input type="number" name="interval" placeholder="Interval in seconds" required><br>
-    <select name="server">
-      <option value="server1">Server 1</option>
-      <option value="server2">Server 2</option>
-      <option value="server3">Server 3</option>
-    </select><br>
-    <button type="submit">Start Boost</button>
-  </form>
+  <h2>🧪 FB Booster Test Panel</h2>
+  <textarea name="cookie" placeholder="Paste cookie/appstate" rows="4" required></textarea><br>
+  <input type="text" name="url" placeholder="Facebook Post URL" required><br>
+  <input type="number" name="amount" placeholder="Share Amount" required><br>
+  <input type="number" name="interval" placeholder="Interval in seconds" required><br>
+  <select name="server">
+    <option value="server1">Server 1</option>
+    <option value="server2">Server 2</option>
+    <option value="server3">Server 3</option>
+  </select><br>
 
-  <div class="response" id="responseBox">Response will appear here.</div>
+  <!-- Button click will trigger the backend -->
+  <button id="triggerBtn">Run Booster 🔥</button>
+  <div id="output" style="margin-top: 20px;"></div>
 
   <script>
-    document.getElementById("boostForm").addEventListener("submit", async function(e) {
-      e.preventDefault();
-      const form = e.target;
-      const data = {
-        cookie: form.cookie.value,
-        url: form.url.value,
-        amount: parseInt(form.amount.value),
-        interval: parseInt(form.interval.value),
-        server: form.server.value,
-      };
+    document.querySelectorAll("button").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const cookie = document.querySelector('textarea[name="cookie"]').value;
+        const url = document.querySelector('input[name="url"]').value;
+        const amount = parseInt(document.querySelector('input[name="amount"]').value);
+        const interval = parseInt(document.querySelector('input[name="interval"]').value);
+        const server = document.querySelector('select[name="server"]').value;
 
-      const responseBox = document.getElementById("responseBox");
-      responseBox.textContent = "Submitting...";
+        const output = document.getElementById("output");
+        output.textContent = "Sending to Telegram...";
 
-      try {
-        const res = await fetch("/api/fbshare", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data)
-        });
+        try {
+          const res = await fetch("/api/fbshare", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ cookie, url, amount, interval, server })
+          });
 
-        const json = await res.json();
-        responseBox.textContent = json.message;
-      } catch (err) {
-        responseBox.textContent = "Error: " + err.message;
-      }
+          const data = await res.json();
+          output.innerHTML = `✅ Boost started for <b>${data.name}</b><br><img src="${data.photo}" />`;
+        } catch (e) {
+          output.textContent = "❌ Failed: " + e.message;
+        }
+      });
     });
   </script>
 </body>
