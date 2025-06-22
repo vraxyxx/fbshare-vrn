@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Facebook Auto Share Booster</title>
+  <style>
+    body {
+      background: #0f0f0f;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      text-align: center;
+    }
+    input, select, button {
+      margin: 10px;
+      padding: 10px;
+      border-radius: 5px;
+      width: 80%;
+      max-width: 400px;
+    }
+    button {
+      background-color: #00f0ff;
+      color: black;
+      font-weight: bold;
+      border: none;
+    }
+    .response {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>🚀 Facebook Share Booster</h1>
+  <form id="boostForm">
+    <input type="text" name="cookie" placeholder="FB Cookie or fbstate" required><br>
+    <input type="text" name="url" placeholder="Facebook Post URL" required><br>
+    <input type="number" name="amount" placeholder="Amount" required><br>
+    <input type="number" name="interval" placeholder="Interval in seconds" required><br>
+    <select name="server">
+      <option value="server1">Server 1</option>
+      <option value="server2">Server 2</option>
+      <option value="server3">Server 3</option>
+    </select><br>
+    <button type="submit">Start Boost</button>
+  </form>
+
+  <div class="response" id="responseBox">Response will appear here.</div>
+
+  <script>
+    document.getElementById("boostForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const data = {
+        cookie: form.cookie.value,
+        url: form.url.value,
+        amount: parseInt(form.amount.value),
+        interval: parseInt(form.interval.value),
+        server: form.server.value,
+      };
+
+      const responseBox = document.getElementById("responseBox");
+      responseBox.textContent = "Submitting...";
+
+      try {
+        const res = await fetch("/api/fbshare", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+
+        const json = await res.json();
+        responseBox.textContent = json.message;
+      } catch (err) {
+        responseBox.textContent = "Error: " + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
